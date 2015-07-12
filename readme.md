@@ -1,1 +1,2 @@
-# user selector component
+# user selector
+this is a web component
