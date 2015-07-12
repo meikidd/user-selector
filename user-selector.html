@@ -12,7 +12,7 @@
     .selected-box li {
       color: #fff;
       cursor: pointer;
-      border-radius: 4px;
+      border-radius: 5px;
       margin: 0 10px 5px 0;
       padding: 6px 12px 8px;
       display: inline-block;
@@ -44,9 +44,6 @@
     }
   </style>
   <content></content>
-  <ul class="selected-box">
-    <li>梅晴光(梅晴光) x</li>
-  </ul>
   <div class="result-panel">
     <ul class="result-list">
       <li>qingguang.meiqg</li>
@@ -56,6 +53,7 @@
       <li>qingguang.meiqg</li>
     </ul>
   </div>
+  <ul class="selected-box"></ul>
 </template>
 
 <script>
@@ -65,10 +63,131 @@
   var template = document.currentScript.ownerDocument.querySelector('template').content;
 
   element.attachedCallback = function() {
+    // create shadow root
     var shadowRoot = this.createShadowRoot();
     var clone = document.importNode(template, true);
     shadowRoot.appendChild(clone);
-  }
+
+    // elements
+    this.input = this.querySelectorAll('input')[0];
+    this.resultList = shadowRoot.querySelectorAll('.result-list')[0];
+    this.selectedBox = shadowRoot.querySelectorAll('.selected-box')[0];
+
+    // property
+    this.index = 0;
+    this.value = [];
+
+    // default value
+    var defaultValues = JSON.parse(this.getAttribute('data-value') || []);
+    defaultValues.forEach(this.userSelected.bind(this));
+
+    // bind event
+    this.bindEvent();
+  };
+
+  element.userSelected = function(user) {
+    var li = document.createElement('li');
+    li.innerHTML = user.name + '(' + (user.nickname ? user.nickname : user.name) + ') <b>x</b>';
+    this.selectedBox.appendChild(li);
+    this.value.push([user]);
+  };
+
+  element.getUser = function(id) {
+    var result = {};
+    this.users.forEach(function(user) {
+      if(user.id == id) {
+        result = user;
+      }
+    });
+    return result;
+  };
+
+  element.search = function(keyword) {
+    if(!keyword) return;
+    setTimeout(function() {
+      this.users = [
+        {id:'qingguang.meigq', name:'梅晴光', nickname:'梅晴光'},
+        {id:'qi', name:'qinge', nickname:'qcdaljlajfdas'},
+        {id:'qssfd', name:'hello', nickname:'world'}
+      ];
+      this.count = this.users.length > this.max ? this.max : this.users.length;
+      this.renderPanel(this.users);
+      this.showPanel();
+    }.bind(this), 100);
+  };
+
+  element.renderPanel = function(users) {
+    var html = '';
+    users.forEach(function(user) {
+      html += '<li data-user-id="' + user.id + '">' + user.name + '</li>';
+    });
+    this.resultList.innerHTML = html;
+  };
+
+  element.bindEvent = function() {
+    this.input.addEventListener('blur', function() {
+      this.isFocusing = false;
+      this.hidePanel();
+    }.bind(this));
+    this.input.addEventListener('focus', function() {
+      this.isFocusing = true;
+    }.bind(this));
+    this.input.addEventListener('keyup', function(e) {
+      if(e.keyCode === 38) {
+        this.up();
+      }else if(e.keyCode === 40) {
+        this.down();
+      }else if(e.keyCode === 13){
+        var elm = this.resultList.querySelectorAll('.selected');
+        if(!elm.length) return;
+        var userId = elm[0].getAttribute('data-user-id');
+        this.userSelected(this.getUser(userId));
+        this.hidePanel();
+        e.preventDefault();
+      }else{
+        this.search(e.target.value);
+      }
+    }.bind(this));
+    this.input.addEventListener('keydown', function(e) {
+      if(e.keyCode === 13){
+        e.preventDefault();
+      }
+    });
+  };
+
+  element.up = function() {
+    if(this.index > 1){
+      this.index--;
+    }else{
+      this.index = this.count;
+    }
+    if(this.selectedElm) {
+      this.selectedElm.className = '';
+    }
+    this.selectedElm = this.resultList.querySelectorAll('li')[this.index-1];
+    this.selectedElm.className = 'selected';
+  };
+  element.down = function() {
+    if(this.index === 0) {
+      this.index = 1;
+    }else if(this.index < this.count){
+      this.index++;
+    }else{
+      this.index = 1;
+    }
+    if(this.selectedElm) {
+      this.selectedElm.className = '';
+    }
+    this.selectedElm = this.resultList.querySelectorAll('li')[this.index-1];
+    this.selectedElm.className = 'selected';
+  };
+
+  element.hidePanel = function() {
+    this.resultList.style.display = 'none';
+  };
+  element.showPanel = function() {
+    this.resultList.style.display = 'block';
+  };
   
   document.registerElement('user-selector', {
     prototype: element
