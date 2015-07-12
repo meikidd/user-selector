@@ -1,0 +1,78 @@
+
+<template>
+  <style type="text/css">
+    ul, li {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .selected-box {
+      margin-top: 5px;
+    }
+    .selected-box li {
+      color: #fff;
+      cursor: pointer;
+      border-radius: 4px;
+      margin: 0 10px 5px 0;
+      padding: 6px 12px 8px;
+      display: inline-block;
+      background-color: #16B7B0;
+    }
+    .selected-box li:hover {
+      background-color: #08A09A;
+    }
+    .result-panel {
+      position: relative;
+      padding-left: 1px;
+    }
+    .result-list {
+      width: 100%;
+      z-index: 999;
+      margin-left: -2px;
+      position: absolute;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      display: none;
+    }
+    .result-list li {
+      padding: 7px 12px;
+      border-bottom: 1px solid #ddd
+    }
+    .result-list li.selected {
+      color: #fff;
+      background-color: #16B7B0;
+    }
+  </style>
+  <content></content>
+  <ul class="selected-box">
+    <li>梅晴光(梅晴光) x</li>
+  </ul>
+  <div class="result-panel">
+    <ul class="result-list">
+      <li>qingguang.meiqg</li>
+      <li class="selected">qingguang.meiqg</li>
+      <li>qingguang.meiqg</li>
+      <li>qingguang.meiqg</li>
+      <li>qingguang.meiqg</li>
+    </ul>
+  </div>
+</template>
+
+<script>
+(function() {
+
+  var element = Object.create(HTMLElement.prototype);
+  var template = document.currentScript.ownerDocument.querySelector('template').content;
+
+  element.attachedCallback = function() {
+    var shadowRoot = this.createShadowRoot();
+    var clone = document.importNode(template, true);
+    shadowRoot.appendChild(clone);
+  }
+  
+  document.registerElement('user-selector', {
+    prototype: element
+  });
+
+})();
+</script>
