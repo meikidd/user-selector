@@ -79,7 +79,7 @@
 
   element.userSelected = function(user) {
     var li = document.createElement('li');
-    li.innerHTML = user.name + '(' + (user.nickname ? user.nickname : user.name) + ') <b>x</b>';
+    li.innerHTML = user.lastName + '(' + user.name + ') <b>x</b>';
     this.selectedBox.appendChild(li);
     this.input.value = '';
     this.value.push(user);
@@ -113,9 +113,10 @@
   };
   element.renderPanel = function(users) {
     var html = '';
-    users.forEach(function(user) {
+    users.forEach(function(user, i) {
+      if(i >= this.max) return;
       html += '<li data-user-id="' + user.id + '">' + user.name + '</li>';
-    });
+    }.bind(this));
     this.resultList.innerHTML = html;
   };
 
