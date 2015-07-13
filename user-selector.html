@@ -1,4 +1,3 @@
-
 <template>
   <style type="text/css">
     ul, li {
@@ -6,14 +5,11 @@
       padding: 0;
       list-style: none;
     }
-    .selected-box {
-      margin-top: 5px;
-    }
     .selected-box li {
       color: #fff;
       cursor: pointer;
       border-radius: 5px;
-      margin: 0 10px 5px 0;
+      margin: 5px 10px 0 0;
       padding: 6px 12px 8px;
       display: inline-block;
       background-color: #16B7B0;
@@ -45,13 +41,7 @@
   </style>
   <content></content>
   <div class="result-panel">
-    <ul class="result-list">
-      <li>qingguang.meiqg</li>
-      <li class="selected">qingguang.meiqg</li>
-      <li>qingguang.meiqg</li>
-      <li>qingguang.meiqg</li>
-      <li>qingguang.meiqg</li>
-    </ul>
+    <ul class="result-list"></ul>
   </div>
   <ul class="selected-box"></ul>
 </template>
@@ -74,11 +64,13 @@
     this.selectedBox = shadowRoot.querySelectorAll('.selected-box')[0];
 
     // property
+    this.max = 5;
     this.index = 0;
     this.value = [];
+    this.url = this.getAttribute('data-url');
 
     // default value
-    var defaultValues = JSON.parse(this.getAttribute('data-value') || []);
+    var defaultValues = JSON.parse(this.getAttribute('data-value') || '[]');
     defaultValues.forEach(this.userSelected.bind(this));
 
     // bind event
@@ -89,7 +81,8 @@
     var li = document.createElement('li');
     li.innerHTML = user.name + '(' + (user.nickname ? user.nickname : user.name) + ') <b>x</b>';
     this.selectedBox.appendChild(li);
-    this.value.push([user]);
+    this.input.value = '';
+    this.value.push(user);
   };
 
   element.getUser = function(id) {
@@ -103,19 +96,21 @@
   };
 
   element.search = function(keyword) {
-    if(!keyword) return;
-    setTimeout(function() {
-      this.users = [
-        {id:'qingguang.meigq', name:'梅晴光', nickname:'梅晴光'},
-        {id:'qi', name:'qinge', nickname:'qcdaljlajfdas'},
-        {id:'qssfd', name:'hello', nickname:'world'}
-      ];
-      this.count = this.users.length > this.max ? this.max : this.users.length;
-      this.renderPanel(this.users);
-      this.showPanel();
-    }.bind(this), 100);
+    if(!keyword || !this.url) return;
+    var xhr = new XMLHttpRequest()
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState == 4 && xhr.status == 200) {
+        this.users = JSON.parse(xhr.responseText).users;
+        this.count = this.users.length > this.max ? this.max : this.users.length;
+        this.index = 0;
+        this.renderPanel(this.users);
+        this.showPanel();
+      }
+    }.bind(this)
+    var url = this.url + '/?keyword=' + encodeURIComponent(keyword);
+    xhr.open("GET", url, true);
+    xhr.send();
   };
-
   element.renderPanel = function(users) {
     var html = '';
     users.forEach(function(user) {
@@ -129,10 +124,22 @@
       this.isFocusing = false;
       this.hidePanel();
     }.bind(this));
+
     this.input.addEventListener('focus', function() {
       this.isFocusing = true;
     }.bind(this));
+    
+    this.input.addEventListener('keydown', function(e) {
+      if(e.keyCode === 13){
+        e.preventDefault();
+      }
+    });
+
     this.input.addEventListener('keyup', function(e) {
+      if(!e.target.value.trim()) {
+        this.hidePanel();
+        return;
+      }
       if(e.keyCode === 38) {
         this.up();
       }else if(e.keyCode === 40) {
@@ -148,11 +155,6 @@
         this.search(e.target.value);
       }
     }.bind(this));
-    this.input.addEventListener('keydown', function(e) {
-      if(e.keyCode === 13){
-        e.preventDefault();
-      }
-    });
   };
 
   element.up = function() {
@@ -168,9 +170,7 @@
     this.selectedElm.className = 'selected';
   };
   element.down = function() {
-    if(this.index === 0) {
-      this.index = 1;
-    }else if(this.index < this.count){
+    if(this.index < this.count){
       this.index++;
     }else{
       this.index = 1;
@@ -183,6 +183,7 @@
   };
 
   element.hidePanel = function() {
+    this.index = 0;
     this.resultList.style.display = 'none';
   };
   element.showPanel = function() {
