@@ -39,6 +39,7 @@
       background-color: #16B7B0;
     }
   </style>
+  
   <content></content>
   <div class="result-panel">
     <ul class="result-list"></ul>
@@ -68,6 +69,7 @@
     this.index = 0;
     this.value = [];
     this.url = this.getAttribute('data-url');
+    this.users = JSON.parse(this.getAttribute('data-users') || '[]');
 
     // default value
     var defaultValues = JSON.parse(this.getAttribute('data-value') || '[]');
@@ -94,22 +96,43 @@
     });
     return result;
   };
+  element.setUsers = function(users) {
+    this.users = users;
+  };
 
   element.search = function(keyword) {
-    if(!keyword || !this.url) return;
-    var xhr = new XMLHttpRequest()
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState == 4 && xhr.status == 200) {
-        this.users = JSON.parse(xhr.responseText).users;
-        this.count = this.users.length > this.max ? this.max : this.users.length;
-        this.index = 0;
-        this.renderPanel(this.users);
-        this.showPanel();
-      }
-    }.bind(this)
-    var url = this.url + '/?keyword=' + encodeURIComponent(keyword);
-    xhr.open("GET", url, true);
-    xhr.send();
+    if(!keyword) return;
+
+    if(this.url) {
+      var xhr = new XMLHttpRequest()
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+          this.users = JSON.parse(xhr.responseText).users;
+          this.count = this.users.length > this.max ? this.max : this.users.length;
+          this.index = 0;
+          this.renderPanel(this.users);
+          this.showPanel();
+        }
+      }.bind(this)
+      var url = this.url + '/?keyword=' + encodeURIComponent(keyword);
+      xhr.open("GET", url, true);
+      xhr.send();
+    } else {
+      var results = this.users.filter(function(user) {
+        if(user.id.indexOf(keyword) > -1 || 
+          user.name.indexOf(keyword) > -1 || 
+          user.lastName.indexOf(keyword) > -1) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+
+      this.count = results.length > this.max ? this.max : results.length;
+      this.index = 0;
+      this.renderPanel(results);
+      this.showPanel();
+    }
   };
   element.renderPanel = function(users) {
     var html = '';
