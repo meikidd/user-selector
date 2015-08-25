@@ -3,11 +3,16 @@
 <head>
   <title>demo</title>
   <link rel="import" href="./user-selector.html">
+  <style type="text/css">
+  input {width: 300px; padding: 3px; font-size: 16px;}
+  user-selector {width: 300px; position: relative;}
+  </style>
 </head>
 <body>
 
+<h3>user selector</h3>
 <user-selector data-users='[{"id":"1","name":"Qingguang Mei","lastName":"Mei"},{"id":"3","name":"Ying Cheng","lastName":"Cheng"},{"id":"4","name":"Qianhe Mei","lastName":"Mei"}]'>
-  <input type="text"/>
+  <input type="text" placeholder="input username here" />
 </user-selector>
 
 </body>

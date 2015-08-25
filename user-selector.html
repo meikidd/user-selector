@@ -10,19 +10,19 @@
       cursor: pointer;
       border-radius: 5px;
       margin: 5px 10px 0 0;
-      padding: 6px 12px 8px;
+      padding: 6px 12px;
       display: inline-block;
-      background-color: #16B7B0;
+      background-color: #0f5ffd;
     }
     .selected-box li:hover {
-      background-color: #08A09A;
+      background-color: #3B78F1;
     }
     .result-panel {
       position: relative;
       padding-left: 1px;
     }
     .result-list {
-      width: 100%;
+      min-width: 310px;
       z-index: 999;
       margin-left: -2px;
       position: absolute;
@@ -36,7 +36,7 @@
     }
     .result-list li.selected {
       color: #fff;
-      background-color: #16B7B0;
+      background-color: #0f5ffd;
     }
   </style>
   
@@ -119,19 +119,23 @@
       xhr.send();
     } else {
       var results = this.users.filter(function(user) {
-        if(user.id.indexOf(keyword) > -1 || 
-          user.name.indexOf(keyword) > -1 || 
-          user.lastName.indexOf(keyword) > -1) {
+        if(user.id.toLowerCase().indexOf(keyword.toLowerCase()) > -1 || 
+          user.name.toLowerCase().indexOf(keyword.toLowerCase()) > -1 || 
+          user.lastName.toLowerCase().indexOf(keyword.toLowerCase()) > -1) {
           return true;
         } else {
           return false;
         }
       });
 
-      this.count = results.length > this.max ? this.max : results.length;
-      this.index = 0;
-      this.renderPanel(results);
-      this.showPanel();
+      if(results.length) {
+        this.count = results.length > this.max ? this.max : results.length;
+        this.index = 0;
+        this.renderPanel(results);
+        this.showPanel();
+      } else {
+        this.hidePanel();
+      }
     }
   };
   element.renderPanel = function(users) {
