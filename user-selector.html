@@ -191,6 +191,9 @@
   // refresh result panel
   element.renderPanel = function(users) {
     var liElms = this.resultList.querySelectorAll('li');
+    for (var i = 0; i < this.max; i++) {
+      liElms[i].className = 'hidden';
+    }
     for (var i = 0; i < this.count; i++) {
       var user = users[i];
       if(!user.name || !user.id) return;
@@ -206,13 +209,6 @@
       }
       liElms[i].innerHTML = userInfo;
     }
-
-    // var html = '';
-    // users.forEach(function(user, i) {
-      // if(i >= this.max) return;
-      // html += '<li data-user-id="' + user.id + '">' + user.name + '</li>';
-    // }.bind(this));
-    // this.resultList.innerHTML = html;
   };
 
 
