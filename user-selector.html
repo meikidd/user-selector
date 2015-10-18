@@ -9,7 +9,7 @@
       color: #fff;
       cursor: pointer;
       border-radius: 5px;
-      margin: 5px 10px 0 0;
+      margin: 5px 5px 0 0;
       padding: 6px 12px;
       display: inline-block;
       background-color: #0f5ffd;
@@ -22,21 +22,29 @@
       padding-left: 1px;
     }
     .result-list {
-      min-width: 310px;
+      width: 100%;
       z-index: 999;
+      display: none;
+      min-width: 310px;
       margin-left: -2px;
       position: absolute;
       background-color: #fff;
       border: 1px solid #ddd;
-      display: none;
     }
     .result-list li {
       padding: 7px 12px;
       border-bottom: 1px solid #ddd
     }
+    .result-list li:hover {
+      color: #fff;
+      background-color: #0f5ffd;
+    }
     .result-list li.selected {
       color: #fff;
       background-color: #0f5ffd;
+    }
+    .hidden {
+      display: none;
     }
   </style>
   
@@ -74,17 +82,38 @@
     // default value
     var defaultValues = JSON.parse(this.getAttribute('data-value') || '[]');
     defaultValues.forEach(this.userSelected.bind(this));
+    
+    // init result panel
+    this.initPanel();
 
     // bind event
     this.bindEvent();
   };
-
   element.userSelected = function(user) {
+    var isSelected = this.value.some(function(value) {
+      if(value.id === user.id) return true;
+    });
+    if(isSelected) return;
+
     var li = document.createElement('li');
-    li.innerHTML = user.lastName + '(' + user.name + ') <b>x</b>';
+    li.innerHTML = user.nickname ? user.name + '(' + user.nickname + ')' : user.name;
+    li.setAttribute('data-user-id', user.id);
+    var b = document.createElement('b');
+    b.innerHTML = ' x ';
+    li.appendChild(b);
     this.selectedBox.appendChild(li);
     this.input.value = '';
     this.value.push(user);
+
+    b.addEventListener('click', function() {
+      var userId = b.parentNode.getAttribute('data-user-id');
+      this.value.forEach(function(value, i) {
+        if(value.id === userId) {
+          this.value.splice(i, 1);
+        }
+      }, this);
+      b.parentNode.remove();
+    }.bind(this));
   };
 
   element.getUser = function(id) {
@@ -99,58 +128,98 @@
   element.setUsers = function(users) {
     this.users = users;
   };
-
+  // search user from remote service
   element.search = function(keyword) {
-    if(!keyword) return;
 
-    if(this.url) {
-      var xhr = new XMLHttpRequest()
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState == 4 && xhr.status == 200) {
-          this.users = JSON.parse(xhr.responseText).users;
-          this.count = this.users.length > this.max ? this.max : this.users.length;
-          this.index = 0;
-          this.renderPanel(this.users);
-          this.showPanel();
-        }
-      }.bind(this)
-      var url = this.url + '/?keyword=' + encodeURIComponent(keyword);
-      xhr.open("GET", url, true);
-      xhr.send();
-    } else {
-      var results = this.users.filter(function(user) {
-        if(user.id.toLowerCase().indexOf(keyword.toLowerCase()) > -1 || 
-          user.name.toLowerCase().indexOf(keyword.toLowerCase()) > -1 || 
-          user.lastName.toLowerCase().indexOf(keyword.toLowerCase()) > -1) {
-          return true;
-        } else {
-          return false;
-        }
-      });
+    // 避免输入的过程中重复请求
+    clearTimeout(element.searchTimeout);
 
-      if(results.length) {
-        this.count = results.length > this.max ? this.max : results.length;
-        this.index = 0;
-        this.renderPanel(results);
-        this.showPanel();
+    element.searchTimeout = setTimeout(function() {
+
+      if(!keyword) return;
+
+      if(this.url) {
+        var xhr = new XMLHttpRequest()
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState == 4 && xhr.status == 200) {
+            this.users = JSON.parse(xhr.responseText).users;
+            this.count = this.users.length > this.max ? this.max : this.users.length;
+            this.index = 0;
+            this.renderPanel(this.users);
+            this.showPanel();
+          }
+        }.bind(this)
+        var url = this.url + '/?keyword=' + encodeURIComponent(keyword);
+        xhr.open("GET", url, true);
+        xhr.send();
       } else {
-        this.hidePanel();
+        var results = this.users.filter(function(user) {
+          if(user.id.toLowerCase().indexOf(keyword.toLowerCase()) > -1 || 
+            user.name.toLowerCase().indexOf(keyword.toLowerCase()) > -1 || 
+            user.lastName.toLowerCase().indexOf(keyword.toLowerCase()) > -1) {
+            return true;
+          } else {
+            return false;
+          }
+        });
+
+        if(results.length) {
+          this.count = results.length > this.max ? this.max : results.length;
+          this.index = 0;
+          this.renderPanel(results);
+          this.showPanel();
+        } else {
+          this.hidePanel();
+        }
       }
+    }.bind(this), 500);
+  };
+
+  // init result panel
+  element.initPanel = function() {
+    var self = this;
+    for (var i = 0; i < this.max; i++) {
+      var liElm = document.createElement('li');
+      liElm.className = 'hidden';
+      this.resultList.appendChild(liElm);
+      liElm.addEventListener('click', function(e) {
+        var userId = this.getAttribute('data-user-id');
+        self.userSelected(self.getUser(userId));
+      }.bind(liElm));
     }
   };
+  // refresh result panel
   element.renderPanel = function(users) {
-    var html = '';
-    users.forEach(function(user, i) {
-      if(i >= this.max) return;
-      html += '<li data-user-id="' + user.id + '">' + user.name + '</li>';
-    }.bind(this));
-    this.resultList.innerHTML = html;
+    var liElms = this.resultList.querySelectorAll('li');
+    for (var i = 0; i < this.count; i++) {
+      var user = users[i];
+      if(!user.name || !user.id) return;
+
+      liElms[i].className = '';
+      liElms[i].setAttribute('data-user-id', user.id);
+      var userInfo = user.name;
+      if(user.nickname) {
+        userInfo += '(' + user.nickname + ')';
+      }
+      if(user.department) {
+        userInfo += ' - ' + user.department;
+      }
+      liElms[i].innerHTML = userInfo;
+    }
+
+    // var html = '';
+    // users.forEach(function(user, i) {
+      // if(i >= this.max) return;
+      // html += '<li data-user-id="' + user.id + '">' + user.name + '</li>';
+    // }.bind(this));
+    // this.resultList.innerHTML = html;
   };
+
 
   element.bindEvent = function() {
     this.input.addEventListener('blur', function() {
       this.isFocusing = false;
-      this.hidePanel();
+      setTimeout(this.hidePanel.bind(this), 50);
     }.bind(this));
 
     this.input.addEventListener('focus', function() {
@@ -213,6 +282,10 @@
   element.hidePanel = function() {
     this.index = 0;
     this.resultList.style.display = 'none';
+    var liElms = this.resultList.querySelectorAll('li');
+    for (var i = 0; i < liElms.length; i++) {
+      liElms[i].className = 'hidden';
+    }
   };
   element.showPanel = function() {
     this.resultList.style.display = 'block';
