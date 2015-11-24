@@ -1,6 +1,6 @@
 {
   "name": "user-selector",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A user selector web component",
   "keywords": [
     "selector",
