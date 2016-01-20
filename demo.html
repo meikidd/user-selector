@@ -21,12 +21,12 @@
 <script type="text/javascript">
   var userSelector = document.querySelector('user-selector');
   userSelector.setSelected([{id:1, name:'Qingguang Mei', nickname:'meikidd'}]);
-  userSelector.addEventListener('select', function() {
+  userSelector.addEventListener('select', function(e) {
     var elm = document.createElement('p');
     elm.innerHTML = 'select:' + e.data.user.name;
     document.querySelector('#console').appendChild(elm);
   });
-  userSelector.addEventListener('remove', function() {
+  userSelector.addEventListener('remove', function(e) {
     var elm = document.createElement('p');
     elm.innerHTML = 'remove:' + e.data.user.name;
     document.querySelector('#console').appendChild(elm);

@@ -41,7 +41,20 @@ userSelector.setSelected([{id:12,name:'qingguang',nickname:'meikidd'}]);
 
 ## Events
 
-### selected
-
+### select
+triggered when a user been selected
+```
+var userSelector = document.querySelector('user-selector');
+userSelector.addEventListener('select', function(e) {
+  console.log(e.data.user);
+});
+```
 
 ### remove
+triggered when a user been removed
+```
+var userSelector = document.querySelector('user-selector');
+userSelector.addEventListener('remove', function(e) {
+  console.log(e.data.user);
+});
+```
