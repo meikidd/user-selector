@@ -1,5 +1,6 @@
 # user selector
-this is a webcomponent for selecting users
+this is a webcomponent for selecting users. [demo](http://meikidd.github.io/user-selector/demo.html)
+
 
 ## Install
 ```
