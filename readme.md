@@ -28,8 +28,34 @@ console.log(userSelector.value); // [{"id":1,"name":"Qingguang Mei","lastName":"
 ```js
 var userSelector = document.querySelector('user-selector');
 userSelector.setSelected([{id:12,name:'qingguang',nickname:'meikidd'}]);
-
 ```
+
+### Set data users
+You can use `setUsers(data)` to set user data.
+```js
+var userSelector = document.querySelector('user-selector');
+userSelector.setUsers([{id:12,name:'qingguang',nickname:'meikidd'}]);
+```
+or attribute `data-users`
+```
+<user-selector data-users='[{"id":"1","name":"Qingguang Mei","lastName":"Mei"},{"id":"3","name":"Ying Cheng","lastName":"Cheng"},{"id":"4","name":"Qianhe Mei","lastName":"Mei"}]'>
+  <input type="text" placeholder="input username here" />
+</user-selector>
+```
+
+### Set template
+Customize search list item format by `setTemplate`
+```js
+var userSelector = document.querySelector('user-selector');
+userSelector.setTemplate('{name} ({nickname}) - {id}');
+```
+or attribute `data-template`
+```
+<user-selector data-template='{name} ({nickname}) - {id}'>
+  <input type="text" placeholder="input username here" />
+</user-selector>
+```
+
 ### Load remote data
 - use `data-url` attribute. When you set `data-url` attribute, user-selector will launch Ajax request `http://example.com/users/search?keyword={keyword}` to the server to get the JSON data.
 

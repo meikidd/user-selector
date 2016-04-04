@@ -2,29 +2,38 @@
 <html>
 <head>
   <title>demo</title>
+  <link href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
   <link rel="import" href="./user-selector.html">
   <style type="text/css">
   input {width: 300px; padding: 3px; font-size: 16px;}
   user-selector {width: 300px; position: relative;}
-  #console {margin-top: 20px; border: 1px solid #999; width: 300px;}
+  #console {margin-top: 80px; width: 300px;}
   </style>
 </head>
 <body>
 
-<h3>user selector</h3>
-<user-selector data-users='[{"id":"1","name":"Qingguang Mei","nickname":"meikidd"},{"id":"3","name":"Ying Cheng","nickname":"Jianying"},{"id":"4","name":"Qianhe Mei","nickname":"Qianhe"},{"id":"5","name":"Yuna Mei","nickname":"una"}]'>
-  <input type="text" placeholder="input username here" />
-</user-selector>
+<div class="row">
+  <div class="col-md-1"></div>
+  <div class="col-md-6">
+    <h3>user selector</h3>
+    <user-selector data-users='[{"id":"1","name":"Qingguang Mei","nickname":"meikidd"},{"id":"3","name":"Ying Cheng","nickname":"Jianying"},{"id":"4","name":"Qianhe Mei","nickname":"Qianhe"},{"id":"5","name":"Yuna Mei","nickname":"una"}]'>
+      <input type="text" class="form-control" placeholder="input username here" />
+    </user-selector>
+    <div id="console"></div>
+  </div>
+  <div class="col-md-5"></div>
+</div>
 
-<div id="console"></div>
 
 <script type="text/javascript">
   var userSelector = document.querySelector('user-selector');
   userSelector.setSelected([{id:1, name:'Qingguang Mei', nickname:'meikidd'}]);
   userSelector.addEventListener('select', function(e) {
     var elm = document.createElement('p');
-    elm.innerHTML = 'select:' + e.data.user.name;
-    document.querySelector('#console').appendChild(elm);
+    if(e.data && e.data.user) {
+      elm.innerHTML = 'select:' + e.data.user.name;
+      document.querySelector('#console').appendChild(elm);
+    }
   });
   userSelector.addEventListener('remove', function(e) {
     var elm = document.createElement('p');
