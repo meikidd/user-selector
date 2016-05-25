@@ -1,13 +1,12 @@
 {
   "name": "user-selector",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "A user selector web component",
   "keywords": [
     "selector",
     "user selector"
   ],
-  "dependencies": {
-  },
+  "dependencies": {},
   "license": "MIT",
   "repository": {
     "type": "git",
