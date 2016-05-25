@@ -6,13 +6,12 @@
       list-style: none;
     }
     .selected-box li {
-      /*color: #fff;*/
+      color: #fff;
       border-radius: 5px;
       margin: 5px 5px 0 0;
       padding: 6px 12px;
       display: inline-block;
-      /*background-color: #118cf2;*/
-      color: #333;
+      background-color: #118cf2;
       border: 1px solid #ccc;
     }
     .selected-box li b {
@@ -20,7 +19,7 @@
       cursor: pointer;
     }
     .selected-box li:hover {
-      /*background-color: #118cf2;*/
+      background-color: #118cf2;
       background-color: #e6e6e6;
     }
     .result-panel {
@@ -91,7 +90,9 @@
     this.value = [];
     this.url = this.getAttribute('data-url');
     this.users = JSON.parse(this.getAttribute('data-users') || '[]');
-    this.template = this.getAttribute('data-template') || '{name}({nickname})';
+    this.formatSelected = this.getAttribute('data-format-selected') || '{name}({nickname})';
+    this.formatList = this.getAttribute('data-format-list') || '{name}({nickname})';
+    
 
     // default value
     var defaultValues = JSON.parse(this.getAttribute('data-value') || '[]');
@@ -107,11 +108,14 @@
     var isSelected = this.value.some(function(value) {
       if(value.id === user.id) return true;
     });
-    if(isSelected) return;
+    if(isSelected){
+      this.input.value = '';
+      return;
+    }
 
 
     var li = document.createElement('li');
-    li.innerHTML = user.nickname ? user.name + '(' + user.nickname + ')' : user.name;
+    li.innerHTML = this._formatSelectedUserInfo(user);
     li.setAttribute('data-user-id', user.id);
     var b = document.createElement('b');
     b.innerHTML = ' x ';
@@ -146,14 +150,17 @@
   element.setUsers = function(users) {
     this.users = users;
   };
-  element.setTemplate = function(template) {
-    this.template = template;
+  element.setFormatSelected = function(formatSelected) {
+    this.formatSelected = formatSelected;
+  }
+  element.setFormatList = function(formatList){
+    this.formatList = formatList;
   }
   element.setSelected = function(users) {
     users.forEach(function(user) {
 
       var li = document.createElement('li');
-      li.innerHTML = user.nickname ? user.name + '(' + user.nickname + ')' : user.name;
+      li.innerHTML = this._formatSelectedUserInfo(user);
       li.setAttribute('data-user-id', user.id);
       var b = document.createElement('b');
       b.innerHTML = ' x ';
@@ -235,9 +242,31 @@
         self.userSelected(user);
         selectEvent.data = {user: user};
         self.dispatchEvent(selectEvent);
+        self.hidePanel();
       }.bind(liElm));
     }
   };
+
+  element._formatListUserInfo = function(userObj){
+    var userInfoStr = this.formatList;
+    var keys = this.formatList.match(/{([0-9a-zA-Z_-]+)}/g);
+    for (var j = 0; j < keys.length; j++) {
+      var key = keys[j].substring(1, keys[j].length-1);
+      userInfoStr = userInfoStr.replace(keys[j], userObj[key] || '');
+    }
+    return userInfoStr;
+  };
+
+  element._formatSelectedUserInfo = function(userObj){
+    var userInfoStr = this.formatSelected;
+    var keys = this.formatSelected.match(/{([0-9a-zA-Z_-]+)}/g);
+    for (var j = 0; j < keys.length; j++) {
+      var key = keys[j].substring(1, keys[j].length-1);
+      userInfoStr = userInfoStr.replace(keys[j], userObj[key] || '');
+    }
+    return userInfoStr;
+  };
+
   // refresh result panel
   element.renderPanel = function(users) {
     var liElms = this.resultList.querySelectorAll('li');
@@ -250,19 +279,8 @@
 
       liElms[i].className = '';
       liElms[i].setAttribute('data-user-id', user.id);
-      var userInfo = this.template;
-      var keys = this.template.match(/{([0-9a-zA-Z_-]+)}/g);
-      for (var j = 0; j < keys.length; j++) {
-        var key = keys[j].substring(1, keys[j].length-1);
-        userInfo = userInfo.replace(keys[j], user[key] || '');
-      }
-      // if(user.nickname) {
-        // userInfo += '(' + user.nickname + ')';
-      // }
-      // if(user.department) {
-        // userInfo += ' - ' + user.department;
-      // }
-      liElms[i].innerHTML = userInfo;
+
+      liElms[i].innerHTML = this._formatListUserInfo(user);
     }
   };
 
@@ -270,7 +288,7 @@
   element.bindEvent = function() {
     this.input.addEventListener('blur', function() {
       this.isFocusing = false;
-      setTimeout(this.hidePanel.bind(this), 50);
+      setTimeout(this.hidePanel.bind(this), 200);
     }.bind(this));
 
     this.input.addEventListener('focus', function() {

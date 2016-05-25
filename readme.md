@@ -44,15 +44,28 @@ or attribute `data-users`
 </user-selector>
 ```
 
-### Set template
-Customize search list item format by `setTemplate`
+### Set selected users template
+Customize search list item format by `setFormatSelected`
 ```js
 var userSelector = document.querySelector('user-selector');
-userSelector.setTemplate('{name} ({nickname}) - {id}');
+userSelector.setFormatSelected('{name} ({nickname}) - {id}');
 ```
-or attribute `data-template`
+or attribute `data-format-selected`
 ```
-<user-selector data-template='{name} ({nickname}) - {id}'>
+<user-selector data-format-selected='{name} ({nickname}) - {id}'>
+  <input type="text" placeholder="input username here" />
+</user-selector>
+```
+
+### Set auto suggestion list template
+Customize search list item format by `setFormatList`
+```js
+var userSelector = document.querySelector('user-selector');
+userSelector.setFormatList('{name} ({nickname}) - {id}');
+```
+or attribute `data-format-list`
+```
+<user-selector data-format-list='{name} ({nickname}) - {id}'>
   <input type="text" placeholder="input username here" />
 </user-selector>
 ```
